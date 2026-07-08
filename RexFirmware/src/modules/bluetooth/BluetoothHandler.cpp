@@ -76,8 +76,8 @@ void BluetoothHandler::onWrite(BLECharacteristic* pCharacteristic) {
 
         // Protocol expected: J:<servo_index>:<angle>\n
         // Examples:
-        // J:0:90  -> Base to 90
-        // J:3:70  -> Gripper to 70
+        // J:0:90  -> Pan to 90
+        // J:1:120 -> Tilt to 120
         
         int firstColon = value.indexOf(':');
         int secondColon = value.indexOf(':', firstColon + 1);
@@ -124,29 +124,23 @@ void BluetoothHandler::onWrite(BLECharacteristic* pCharacteristic) {
             int servoIndex = indexStr.toInt();
             float targetAngle = angleStr.toFloat();
 
-            if (servoIndex >= 0 && servoIndex < 4) {
-                // Ensure angle is within valid ranges, although MotionManager might handle it
+            if (servoIndex >= 0 && servoIndex < 2) {
                 _motion.setTarget(servoIndex, targetAngle);
-                Serial.printf("Setting Servo %d to %.1f\n", servoIndex, targetAngle);
+                Serial.printf("Setting Camera Servo %d to %.1f\n", servoIndex, targetAngle);
             } else {
-                Serial.println("Error: Invalid servo index received via BLE.");
+                Serial.println("Error: Invalid camera servo index received via BLE.");
             }
         } else if (value.startsWith("A:")) {
-            // Protocol expected: A:<a0>:<a1>:<a2>:<a3>\n
+            // Protocol expected: A:<pan_angle>:<tilt_angle>\n
             int c1 = value.indexOf(':', 2);
-            int c2 = value.indexOf(':', c1 + 1);
-            int c3 = value.indexOf(':', c2 + 1);
 
-            if (c1 != -1 && c2 != -1 && c3 != -1) {
-                float a0 = value.substring(2, c1).toFloat();
-                float a1 = value.substring(c1 + 1, c2).toFloat();
-                float a2 = value.substring(c2 + 1, c3).toFloat();
-                float a3 = value.substring(c3 + 1).toFloat();
+            if (c1 != -1) {
+                float pan = value.substring(2, c1).toFloat();
+                float tilt = value.substring(c1 + 1).toFloat();
 
-                _motion.setTarget(0, a0);
-                _motion.setTarget(1, a1);
-                _motion.setTarget(2, a2);
-                _motion.setTarget(3, a3);
+                _motion.setTarget(0, pan);
+                _motion.setTarget(1, tilt);
+                Serial.printf("BLE Dual Camera Target: Pan=%.1f, Tilt=%.1f\n", pan, tilt);
             }
         }
     }
