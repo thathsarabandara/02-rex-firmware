@@ -3,13 +3,17 @@
 MotorController::MotorController() {}
 
 void MotorController::begin() {
-    // Configure motor direction and PWM pins as outputs
-    pinMode(MOTOR_LEFT_ENA, OUTPUT);
-    pinMode(MOTOR_LEFT_IN1, OUTPUT);
-    pinMode(MOTOR_LEFT_IN2, OUTPUT);
-    pinMode(MOTOR_RIGHT_ENB, OUTPUT);
-    pinMode(MOTOR_RIGHT_IN3, OUTPUT);
-    pinMode(MOTOR_RIGHT_IN4, OUTPUT);
+    // Configure TB6612FNG direction, PWM and STBY pins as outputs
+    pinMode(MOTOR_LEFT_PWMA, OUTPUT);
+    pinMode(MOTOR_LEFT_AIN1, OUTPUT);
+    pinMode(MOTOR_LEFT_AIN2, OUTPUT);
+    pinMode(MOTOR_RIGHT_PWMB, OUTPUT);
+    pinMode(MOTOR_RIGHT_BIN1, OUTPUT);
+    pinMode(MOTOR_RIGHT_BIN2, OUTPUT);
+    pinMode(MOTOR_STBY, OUTPUT);
+
+    // Disable standby to enable the driver board
+    digitalWrite(MOTOR_STBY, HIGH);
 
     // Ensure motors are initially stopped
     stop();
@@ -37,11 +41,11 @@ void MotorController::drive(const String& direction, float speed) {
     } else if (direction.equalsIgnoreCase("backward")) {
         drive(0.0f, -normalizedSpeed);
     } else if (direction.equalsIgnoreCase("left")) {
-        // Spin left in place or steer left
-        drive(-normalizedSpeed, normalizedSpeed * 0.5f);
+        // Spin left in place
+        drive(-normalizedSpeed, 0.0f);
     } else if (direction.equalsIgnoreCase("right")) {
-        // Spin right in place or steer right
-        drive(normalizedSpeed, normalizedSpeed * 0.5f);
+        // Spin right in place
+        drive(normalizedSpeed, 0.0f);
     } else {
         stop();
     }
@@ -52,33 +56,33 @@ void MotorController::stop() {
 }
 
 void MotorController::setMotorSpeeds(float leftSpeed, float rightSpeed) {
-    // Left Motor Control
+    // Left Motor Control (Motor A)
     if (leftSpeed > 0.01f) {
-        digitalWrite(MOTOR_LEFT_IN1, HIGH);
-        digitalWrite(MOTOR_LEFT_IN2, LOW);
-        analogWrite(MOTOR_LEFT_ENA, (int)(leftSpeed * 255));
+        digitalWrite(MOTOR_LEFT_AIN1, HIGH);
+        digitalWrite(MOTOR_LEFT_AIN2, LOW);
+        analogWrite(MOTOR_LEFT_PWMA, (int)(leftSpeed * 255));
     } else if (leftSpeed < -0.01f) {
-        digitalWrite(MOTOR_LEFT_IN1, LOW);
-        digitalWrite(MOTOR_LEFT_IN2, HIGH);
-        analogWrite(MOTOR_LEFT_ENA, (int)(-leftSpeed * 255));
+        digitalWrite(MOTOR_LEFT_AIN1, LOW);
+        digitalWrite(MOTOR_LEFT_AIN2, HIGH);
+        analogWrite(MOTOR_LEFT_PWMA, (int)(-leftSpeed * 255));
     } else {
-        digitalWrite(MOTOR_LEFT_IN1, LOW);
-        digitalWrite(MOTOR_LEFT_IN2, LOW);
-        analogWrite(MOTOR_LEFT_ENA, 0);
+        digitalWrite(MOTOR_LEFT_AIN1, LOW);
+        digitalWrite(MOTOR_LEFT_AIN2, LOW);
+        analogWrite(MOTOR_LEFT_PWMA, 0);
     }
 
-    // Right Motor Control
+    // Right Motor Control (Motor B)
     if (rightSpeed > 0.01f) {
-        digitalWrite(MOTOR_RIGHT_IN3, HIGH);
-        digitalWrite(MOTOR_RIGHT_IN4, LOW);
-        analogWrite(MOTOR_RIGHT_ENB, (int)(rightSpeed * 255));
+        digitalWrite(MOTOR_RIGHT_BIN1, HIGH);
+        digitalWrite(MOTOR_RIGHT_BIN2, LOW);
+        analogWrite(MOTOR_RIGHT_PWMB, (int)(rightSpeed * 255));
     } else if (rightSpeed < -0.01f) {
-        digitalWrite(MOTOR_RIGHT_IN3, LOW);
-        digitalWrite(MOTOR_RIGHT_IN4, HIGH);
-        analogWrite(MOTOR_RIGHT_ENB, (int)(-rightSpeed * 255));
+        digitalWrite(MOTOR_RIGHT_BIN1, LOW);
+        digitalWrite(MOTOR_RIGHT_BIN2, HIGH);
+        analogWrite(MOTOR_RIGHT_PWMB, (int)(-rightSpeed * 255));
     } else {
-        digitalWrite(MOTOR_RIGHT_IN3, LOW);
-        digitalWrite(MOTOR_RIGHT_IN4, LOW);
-        analogWrite(MOTOR_RIGHT_ENB, 0);
+        digitalWrite(MOTOR_RIGHT_BIN1, LOW);
+        digitalWrite(MOTOR_RIGHT_BIN2, LOW);
+        analogWrite(MOTOR_RIGHT_PWMB, 0);
     }
 }

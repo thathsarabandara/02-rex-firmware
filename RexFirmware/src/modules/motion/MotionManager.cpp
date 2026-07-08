@@ -4,11 +4,9 @@
 MotionManager::MotionManager(ServoController& controller, MotorController& motorController) 
     : _controller(controller), _motorController(motorController), _smoothFactor(DEFAULT_SMOOTH_FACTOR) 
 {
-    // Initialize servo data with home positions and limits
-    _servos[0] = {BASE_SERVO, BASE_HOME, BASE_HOME, BASE_MIN, BASE_MAX};
-    _servos[1] = {SHOULDER_SERVO, SHOULDER_HOME, SHOULDER_HOME, SHOULDER_MIN, SHOULDER_MAX};
-    _servos[2] = {ELBOW_SERVO, ELBOW_HOME, ELBOW_HOME, ELBOW_MIN, ELBOW_MAX};
-    _servos[3] = {GRIPPER_SERVO, GRIPPER_HOME, GRIPPER_HOME, GRIPPER_MIN, GRIPPER_MAX};
+    // Initialize Camera Pan-Tilt servo configurations
+    _servos[0] = {PAN_SERVO_CH, PAN_HOME, PAN_HOME, PAN_MIN, PAN_MAX};
+    _servos[1] = {TILT_SERVO_CH, TILT_HOME, TILT_HOME, TILT_MIN, TILT_MAX};
 }
 
 void MotionManager::begin() {
@@ -30,7 +28,8 @@ void MotionManager::stopCar() {
 }
 
 void MotionManager::update() {
-    for (int i = 0; i < 4; i++) {
+    // Smooth and update camera servos (0: Pan, 1: Tilt)
+    for (int i = 0; i < 2; i++) {
         float error = _servos[i].targetAngle - _servos[i].currentAngle;
 
         if (abs(error) > 0.05f) {
@@ -41,7 +40,7 @@ void MotionManager::update() {
 }
 
 void MotionManager::setTarget(int servoIndex, float newTarget) {
-    if (servoIndex < 0 || servoIndex >= 4) return;
+    if (servoIndex < 0 || servoIndex >= 2) return;
     
     _servos[servoIndex].targetAngle = constrain(
         newTarget, 
@@ -51,7 +50,7 @@ void MotionManager::setTarget(int servoIndex, float newTarget) {
 }
 
 void MotionManager::moveJoint(int servoIndex, float intensity) {
-    if (servoIndex < 0 || servoIndex >= 4) return;
+    if (servoIndex < 0 || servoIndex >= 2) return;
     
     float direction = (intensity > 0) ? 1.0f : -1.0f;
     float absIntensity = abs(intensity);
@@ -69,25 +68,44 @@ void MotionManager::moveJoint(int servoIndex, float intensity) {
 }
 
 float MotionManager::getTarget(int servoIndex) const {
-    return (servoIndex >= 0 && servoIndex < 4) ? _servos[servoIndex].targetAngle : 0;
+    return (servoIndex >= 0 && servoIndex < 2) ? _servos[servoIndex].targetAngle : 0;
 }
 
 float MotionManager::getCurrent(int servoIndex) const {
-    return (servoIndex >= 0 && servoIndex < 4) ? _servos[servoIndex].currentAngle : 0;
+    return (servoIndex >= 0 && servoIndex < 2) ? _servos[servoIndex].currentAngle : 0;
 }
 
 void MotionManager::startupSequence() {
-    // Initial sync
-    for (int i = 0; i < 4; i++) {
+    // Initial sync to home positions
+    for (int i = 0; i < 2; i++) {
         _controller.setAngle(_servos[i].channel, _servos[i].currentAngle);
     }
+    
+    Serial.println("Performing Pan/Tilt self-test...");
+    
+    // Pan sweep
+    _controller.setAngle(PAN_SERVO_CH, PAN_HOME - 20);
+    delay(200);
+    _controller.setAngle(PAN_SERVO_CH, PAN_HOME + 20);
+    delay(200);
+    _controller.setAngle(PAN_SERVO_CH, PAN_HOME);
+    delay(200);
+
+    // Tilt sweep
+    _controller.setAngle(TILT_SERVO_CH, TILT_HOME - 15);
+    delay(200);
+    _controller.setAngle(TILT_SERVO_CH, TILT_HOME + 15);
+    delay(200);
+    _controller.setAngle(TILT_SERVO_CH, TILT_HOME);
+    delay(200);
+
     // Motor self-test sequence
-    _motorController.drive(0.0f, 0.5f); // Move forward 50% speed
-    delay(200);
-    _motorController.drive(0.0f, -0.5f); // Move backward 50% speed
-    delay(200);
+    Serial.println("Performing Motor self-test...");
+    _motorController.drive(0.0f, 0.4f); // Move forward 40% speed
+    delay(150);
+    _motorController.drive(0.0f, -0.4f); // Move backward 40% speed
+    delay(150);
     _motorController.stop();             // Stop motors
 
-    delay(600);
     Serial.println("Motion System Initialized");
 }

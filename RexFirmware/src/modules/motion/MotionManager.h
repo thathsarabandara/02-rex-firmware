@@ -26,7 +26,7 @@ public:
 private:
     ServoController& _controller;
     MotorController& _motorController;
-    ServoData _servos[4];
+    ServoData _servos[2]; // Index 0 = Pan, Index 1 = Tilt
     float _smoothFactor;
 };
 
