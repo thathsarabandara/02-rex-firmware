@@ -1,0 +1,214 @@
+#ifndef ROBOT_STATES_H
+#define ROBOT_STATES_H
+
+#include <Arduino.h>
+
+// ======================================================
+// ENUMS FOR ROBOT STATE SYSTEMS
+// ======================================================
+
+// 1. Core Operating States
+enum OperatingState {
+    OP_BOOTING,
+    OP_IDLE,
+    OP_LISTENING,
+    OP_THINKING,
+    OP_SPEAKING,
+    OP_WAKE_WORD_DETECTED,
+    OP_FOLLOWING_USER,
+    OP_NAVIGATION,
+    OP_OBSTACLE_DETECTED,
+    OP_AVOIDING_OBSTACLE,
+    OP_CHARGING,
+    OP_BATTERY_LOW,
+    OP_ERROR,
+    OP_WIFI_CONNECTING,
+    OP_CONNECTED,
+    OP_OTA_UPDATE,
+    OP_SLEEPING,
+    OP_GREETING_USER,
+    OP_GOODBYE,
+    OP_ALARM_MODE,
+    OP_SECURITY_PATROL,
+    OP_STATE_COUNT // Helper count
+};
+
+// 2. Emotional States (face animation & LED color style modification)
+enum EmotionState {
+    EM_HAPPY,
+    EM_NEUTRAL,
+    EM_CURIOUS,
+    EM_SLEEPY,
+    EM_SURPRISED,
+    EM_ANGRY,
+    EM_SAD,
+    EM_SCARED,
+    EM_LOVING,
+    EM_FOCUSED
+};
+
+// 3. Sub-system battery states
+enum BatteryState {
+    BATT_FULL,
+    BATT_NORMAL,
+    BATT_MEDIUM,
+    BATT_LOW,
+    BATT_CRITICAL,
+    BATT_CHARGING,
+    BATT_FULLY_CHARGED
+};
+
+// 4. Sub-system network states
+enum NetworkState {
+    NET_OFFLINE,
+    NET_CONNECTING,
+    NET_CONNECTED,
+    NET_INTERNET_LOST,
+    NET_CLOUD_CONNECTED,
+    NET_OTA_UPDATING
+};
+
+// 5. Sub-system AI agent states
+enum AIState {
+    AI_WAITING,
+    AI_WAKE_WORD,
+    AI_RECORDING,
+    AI_SPEECH_TO_TEXT,
+    AI_THINKING,
+    AI_FUNCTION_CALLING,
+    AI_TEXT_TO_SPEECH,
+    AI_SPEAKING,
+    AI_FINISHED
+};
+
+// 6. Sub-system navigation states
+enum NavState {
+    NAV_STOPPED,
+    NAV_MANUAL,
+    NAV_EXPLORING,
+    NAV_FOLLOWING_PERSON,
+    NAV_GOING_TO_LOC,
+    NAV_AVOIDING_OBSTACLE,
+    NAV_DOCKING,
+    NAV_CHARGING
+};
+
+// 7. Sub-system security states
+enum SecurityState {
+    SEC_NORMAL,
+    SEC_MOTION_DETECTED,
+    SEC_UNKNOWN_PERSON,
+    SEC_KNOWN_PERSON,
+    SEC_INTRUDER_ALERT,
+    SEC_EMERGENCY
+};
+
+// ======================================================
+// ENUMS FOR ACTUATOR & UI PATTERNS
+// ======================================================
+
+// OLED Eye Animations
+enum OledEyeAnim {
+    EYE_LOADING,
+    EYE_BLINK,
+    EYE_WIDE,
+    EYE_LOOK_UP,
+    EYE_LOOK_LEFT_RIGHT,
+    EYE_SHOCKED,
+    EYE_SLEEPY,
+    EYE_TIRED,
+    EYE_X_EYES,
+    EYE_SEARCHING,
+    EYE_HAPPY,
+    EYE_PROGRESS,
+    EYE_CLOSED,
+    EYE_SMILE,
+    EYE_ANGRY,
+    EYE_SCANNING,
+    EYE_SAD,
+    EYE_SCARED,
+    EYE_LOVING,
+    EYE_FOCUSED
+};
+
+// WS2812 LED Patterns
+enum LedPattern {
+    LED_OFF,
+    LED_BREATHING_BLUE,
+    LED_BREATHING_WHITE,
+    LED_SPINNING_BLUE,
+    LED_ROTATING_CYAN,
+    LED_PULSE_GREEN,
+    LED_FLASH_BLUE,
+    LED_MOVING_WHITE,
+    LED_DIRECTION_WHITE,
+    LED_FLASH_RED,
+    LED_CHASE_ORANGE,
+    LED_BREATHING_GREEN,
+    LED_BREATHING_YELLOW,
+    LED_BLINKING_RED,
+    LED_CHASING_BLUE,
+    LED_FLASH_GREEN,
+    LED_BREATHING_PURPLE,
+    LED_RAINBOW_SWEEP,
+    LED_FADE_BLUE,
+    LED_STROBE_RED,
+    LED_SCANNER_WHITE,
+    LED_DIM_BLUE
+};
+
+// Buzzer Sounds
+enum BuzzerSound {
+    SOUND_NONE,
+    SOUND_STARTUP,
+    SOUND_SHORT_BEEP,
+    SOUND_CONFIRMATION,
+    SOUND_WARNING,
+    SOUND_CHARGE_CONNECT,
+    SOUND_LOW_BATTERY,
+    SOUND_ALARM,
+    SOUND_SUCCESS,
+    SOUND_GREETING,
+    SOUND_GOODBYE,
+    SOUND_CONTINUOUS_ALARM
+};
+
+// ======================================================
+// CONFIGURATION STRUCTURE MAPPING
+// ======================================================
+struct StateBehaviorConfig {
+    OperatingState state;
+    const char* name;
+    OledEyeAnim eyeAnim;
+    LedPattern frontLed;
+    LedPattern rearLed;
+    BuzzerSound buzzer;
+};
+
+// Array of operating states mappings
+const StateBehaviorConfig STATE_BEHAVIOR_CONFIGS[OP_STATE_COUNT] = {
+    // State | Name | OLED Eyes | Front LEDs | Rear LEDs | Buzzer
+    { OP_BOOTING, "Booting", EYE_LOADING, LED_BREATHING_BLUE, LED_BREATHING_BLUE, SOUND_STARTUP },
+    { OP_IDLE, "Idle", EYE_BLINK, LED_BREATHING_WHITE, LED_OFF, SOUND_NONE },
+    { OP_LISTENING, "Listening", EYE_WIDE, LED_SPINNING_BLUE, LED_OFF, SOUND_SHORT_BEEP },
+    { OP_THINKING, "Thinking", EYE_LOOK_UP, LED_ROTATING_CYAN, LED_ROTATING_CYAN, SOUND_NONE },
+    { OP_SPEAKING, "Speaking", EYE_HAPPY, LED_PULSE_GREEN, LED_PULSE_GREEN, SOUND_NONE }, // using EYE_HAPPY for talking mouth anim context
+    { OP_WAKE_WORD_DETECTED, "Wake Word Detected", EYE_WIDE, LED_FLASH_BLUE, LED_FLASH_BLUE, SOUND_CONFIRMATION },
+    { OP_FOLLOWING_USER, "Following User", EYE_FOCUSED, LED_MOVING_WHITE, LED_MOVING_WHITE, SOUND_NONE },
+    { OP_NAVIGATION, "Navigation", EYE_FOCUSED, LED_DIRECTION_WHITE, LED_DIRECTION_WHITE, SOUND_NONE },
+    { OP_OBSTACLE_DETECTED, "Obstacle Detected", EYE_SHOCKED, LED_FLASH_RED, LED_FLASH_RED, SOUND_WARNING },
+    { OP_AVOIDING_OBSTACLE, "Avoiding Obstacle", EYE_LOOK_LEFT_RIGHT, LED_CHASE_ORANGE, LED_CHASE_ORANGE, SOUND_NONE },
+    { OP_CHARGING, "Charging", EYE_SLEEPY, LED_BREATHING_GREEN, LED_BREATHING_GREEN, SOUND_CHARGE_CONNECT },
+    { OP_BATTERY_LOW, "Battery Low", EYE_TIRED, LED_BREATHING_YELLOW, LED_BREATHING_YELLOW, SOUND_LOW_BATTERY },
+    { OP_ERROR, "Error", EYE_X_EYES, LED_BLINKING_RED, LED_BLINKING_RED, SOUND_ALARM },
+    { OP_WIFI_CONNECTING, "WiFi Connecting", EYE_SEARCHING, LED_CHASING_BLUE, LED_CHASING_BLUE, SOUND_NONE },
+    { OP_CONNECTED, "Connected", EYE_HAPPY, LED_FLASH_GREEN, LED_FLASH_GREEN, SOUND_SUCCESS },
+    { OP_OTA_UPDATE, "OTA Update", EYE_PROGRESS, LED_BREATHING_PURPLE, LED_BREATHING_PURPLE, SOUND_NONE },
+    { OP_SLEEPING, "Sleeping", EYE_CLOSED, LED_OFF, LED_DIM_BLUE, SOUND_NONE },
+    { OP_GREETING_USER, "Greeting User", EYE_HAPPY, LED_RAINBOW_SWEEP, LED_RAINBOW_SWEEP, SOUND_GREETING },
+    { OP_GOODBYE, "Goodbye", EYE_SMILE, LED_FADE_BLUE, LED_FADE_BLUE, SOUND_GOODBYE },
+    { OP_ALARM_MODE, "Alarm Mode", EYE_ANGRY, LED_STROBE_RED, LED_STROBE_RED, SOUND_CONTINUOUS_ALARM },
+    { OP_SECURITY_PATROL, "Security Patrol", EYE_SCANNING, LED_SCANNER_WHITE, LED_SCANNER_WHITE, SOUND_NONE }
+};
+
+#endif // ROBOT_STATES_H
