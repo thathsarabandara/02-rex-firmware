@@ -1,19 +1,25 @@
 #include "MotorController.h"
 
-MotorController::MotorController() {}
+MotorController::MotorController() : _mcp(nullptr) {}
 
-void MotorController::begin() {
-    // Configure TB6612FNG direction, PWM and STBY pins as outputs
+void MotorController::begin(Adafruit_MCP23X17* mcp) {
+    _mcp = mcp;
+
+    // Configure ESP32 PWM pins
     pinMode(MOTOR_LEFT_PWMA, OUTPUT);
-    pinMode(MOTOR_LEFT_AIN1, OUTPUT);
-    pinMode(MOTOR_LEFT_AIN2, OUTPUT);
     pinMode(MOTOR_RIGHT_PWMB, OUTPUT);
-    pinMode(MOTOR_RIGHT_BIN1, OUTPUT);
-    pinMode(MOTOR_RIGHT_BIN2, OUTPUT);
-    pinMode(MOTOR_STBY, OUTPUT);
 
-    // Disable standby to enable the driver board
-    digitalWrite(MOTOR_STBY, HIGH);
+    // Configure MCP23017 direction and STBY pins
+    if (_mcp != nullptr) {
+        _mcp->pinMode(MOTOR_LEFT_AIN1, OUTPUT);
+        _mcp->pinMode(MOTOR_LEFT_AIN2, OUTPUT);
+        _mcp->pinMode(MOTOR_RIGHT_BIN1, OUTPUT);
+        _mcp->pinMode(MOTOR_RIGHT_BIN2, OUTPUT);
+        _mcp->pinMode(MOTOR_STBY, OUTPUT);
+
+        // Disable standby to enable the driver board
+        _mcp->digitalWrite(MOTOR_STBY, HIGH);
+    }
 
     // Ensure motors are initially stopped
     stop();
@@ -56,33 +62,35 @@ void MotorController::stop() {
 }
 
 void MotorController::setMotorSpeeds(float leftSpeed, float rightSpeed) {
+    if (!_mcp) return; // Prevent crashes if MCP is not initialized
+
     // Left Motor Control (Motor A)
     if (leftSpeed > 0.01f) {
-        digitalWrite(MOTOR_LEFT_AIN1, HIGH);
-        digitalWrite(MOTOR_LEFT_AIN2, LOW);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN1, HIGH);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN2, LOW);
         analogWrite(MOTOR_LEFT_PWMA, (int)(leftSpeed * 255));
     } else if (leftSpeed < -0.01f) {
-        digitalWrite(MOTOR_LEFT_AIN1, LOW);
-        digitalWrite(MOTOR_LEFT_AIN2, HIGH);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN1, LOW);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN2, HIGH);
         analogWrite(MOTOR_LEFT_PWMA, (int)(-leftSpeed * 255));
     } else {
-        digitalWrite(MOTOR_LEFT_AIN1, LOW);
-        digitalWrite(MOTOR_LEFT_AIN2, LOW);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN1, LOW);
+        _mcp->digitalWrite(MOTOR_LEFT_AIN2, LOW);
         analogWrite(MOTOR_LEFT_PWMA, 0);
     }
 
     // Right Motor Control (Motor B)
     if (rightSpeed > 0.01f) {
-        digitalWrite(MOTOR_RIGHT_BIN1, HIGH);
-        digitalWrite(MOTOR_RIGHT_BIN2, LOW);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN1, HIGH);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN2, LOW);
         analogWrite(MOTOR_RIGHT_PWMB, (int)(rightSpeed * 255));
     } else if (rightSpeed < -0.01f) {
-        digitalWrite(MOTOR_RIGHT_BIN1, LOW);
-        digitalWrite(MOTOR_RIGHT_BIN2, HIGH);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN1, LOW);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN2, HIGH);
         analogWrite(MOTOR_RIGHT_PWMB, (int)(-rightSpeed * 255));
     } else {
-        digitalWrite(MOTOR_RIGHT_BIN1, LOW);
-        digitalWrite(MOTOR_RIGHT_BIN2, LOW);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN1, LOW);
+        _mcp->digitalWrite(MOTOR_RIGHT_BIN2, LOW);
         analogWrite(MOTOR_RIGHT_PWMB, 0);
     }
 }
