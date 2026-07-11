@@ -5,7 +5,6 @@
 #include "src/modules/servo_control/ServoController.h"
 #include "src/modules/motor_control/MotorController.h"
 #include "src/modules/motion/MotionManager.h"
-#include "src/modules/joystick/JoystickHandler.h"
 #include "src/modules/bluetooth/BluetoothHandler.h"
 #include "src/modules/network/RobotNetwork.h"
 #include "src/modules/sensors/SensorManager.h"
@@ -21,7 +20,6 @@
 ServoController  servoCtrl(PCA9685_ADDR);
 MotorController  motorCtrl;
 MotionManager    motion(servoCtrl, motorCtrl);
-JoystickHandler  joysticks(motion);
 BluetoothHandler ble(motion);
 SensorManager    sensors;
 DisplayManager   displayMgr;
@@ -45,9 +43,12 @@ void setup() {
     // 1. Initialize Buzzer & LEDs
     indicators.begin();
     
-    // 2. Initialize I2C Bus
-    Wire.begin(I2C_SDA, I2C_SCL);
+    // 2. Initialize Primary I2C (Display) & Secondary I2C (Sensors/Servos)
+    Wire.begin(I2C_DISPLAY_SDA, I2C_DISPLAY_SCL);
     Wire.setClock(I2C_CLOCK_SPEED);
+    
+    Wire1.begin(I2C_SENSOR_SDA, I2C_SENSOR_SCL);
+    Wire1.setClock(I2C_CLOCK_SPEED);
     
     // 3. Initialize Display
     displayMgr.begin();
@@ -58,7 +59,7 @@ void setup() {
     sensors.begin();
     
     // 5. Initialize Motion System (Servos & Motors self-test)
-    motion.begin();
+    motion.begin(&sensors.getMCP());
     
     // 6. Initialize BLE Server
     ble.begin();
@@ -68,12 +69,12 @@ void setup() {
         indicators.setState(OP_WIFI_CONNECTING);
         network.begin();
         if (network.isConnected()) {
-            indicators.setState(OP_CONNECTED);
+            indicators.setState(OP_IDLE_READY);
         } else {
-            indicators.setState(OP_IDLE);
+            indicators.setState(OP_IDLE_READY);
         }
     } else {
-        Serial.println("DEMO LOOP MODE ENABLED. Cycling through all 21 states.");
+        Serial.println("DEMO LOOP MODE ENABLED. Cycling through all 25 states.");
         lastDemoTransition = millis();
         indicators.setState(currentState);
     }
@@ -118,16 +119,15 @@ void loop() {
         network.update();
         sensors.update();
 
-        if (!ble.isConnected()) {
-            joysticks.readAndProcess();
-        }
+        // Joystick removed per user request
+
         
         motion.update();
         
         if (network.isConnected()) {
-            currentState = OP_CONNECTED;
+            currentState = OP_IDLE_READY;
         } else if (WiFi.status() == WL_CONNECTED) {
-            currentState = OP_IDLE;
+            currentState = OP_IDLE_READY;
         } else {
             currentState = OP_WIFI_CONNECTING;
         }
