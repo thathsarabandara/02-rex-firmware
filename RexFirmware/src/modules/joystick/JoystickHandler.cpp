@@ -31,8 +31,8 @@ void JoystickHandler::readAndProcess() {
     _motion.driveCar(normX, normY);
     
     // 2. Process Camera Pan/Tilt (Joystick 2)
-    processAxis(analogRead(JOY2_X), PAN_SERVO);
-    processAxis(analogRead(JOY2_Y), TILT_SERVO);
+    processAxis(analogRead(JOY2_X), 0); // Index 0 is Camera Pan
+    processAxis(analogRead(JOY2_Y), 1); // Index 1 is Camera Tilt
 }
 
 void JoystickHandler::processAxis(int rawValue, int servoIndex) {
