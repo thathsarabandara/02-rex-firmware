@@ -10,26 +10,30 @@
 // 1. Core Operating States
 enum OperatingState {
     OP_BOOTING,
-    OP_IDLE,
+    OP_IDLE_READY,
+    OP_MANUAL_CONTROL,
+    OP_AUTONOMOUS_PATROL,
+    OP_LINE_FOLLOWING,
+    OP_FOLLOW_ME,
+    OP_AI_THINKING,
     OP_LISTENING,
-    OP_THINKING,
     OP_SPEAKING,
-    OP_WAKE_WORD_DETECTED,
-    OP_FOLLOWING_USER,
-    OP_NAVIGATION,
-    OP_OBSTACLE_DETECTED,
-    OP_AVOIDING_OBSTACLE,
+    OP_CAMERA_RECORDING,
     OP_CHARGING,
-    OP_BATTERY_LOW,
-    OP_ERROR,
+    OP_FULLY_CHARGED,
+    OP_LOW_BATTERY,
+    OP_CRITICAL_BATTERY,
+    OP_OBSTACLE_WARNING,
+    OP_OBSTACLE_CRITICAL,
     OP_WIFI_CONNECTING,
-    OP_CONNECTED,
-    OP_OTA_UPDATE,
-    OP_SLEEPING,
-    OP_GREETING_USER,
-    OP_GOODBYE,
-    OP_ALARM_MODE,
-    OP_SECURITY_PATROL,
+    OP_MQTT_DISCONNECTED,
+    OP_SENSOR_ERROR,
+    OP_MOTOR_ERROR,
+    OP_UNKNOWN_PERSON,
+    OP_INTRUDER_DETECTED,
+    OP_GAS_ALERT,
+    OP_EMERGENCY_STOP,
+    OP_SHUTDOWN,
     OP_STATE_COUNT // Helper count
 };
 
@@ -104,111 +108,41 @@ enum SecurityState {
 };
 
 // ======================================================
-// ENUMS FOR ACTUATOR & UI PATTERNS
-// ======================================================
-
-// OLED Eye Animations
-enum OledEyeAnim {
-    EYE_LOADING,
-    EYE_BLINK,
-    EYE_WIDE,
-    EYE_LOOK_UP,
-    EYE_LOOK_LEFT_RIGHT,
-    EYE_SHOCKED,
-    EYE_SLEEPY,
-    EYE_TIRED,
-    EYE_X_EYES,
-    EYE_SEARCHING,
-    EYE_HAPPY,
-    EYE_PROGRESS,
-    EYE_CLOSED,
-    EYE_SMILE,
-    EYE_ANGRY,
-    EYE_SCANNING,
-    EYE_SAD,
-    EYE_SCARED,
-    EYE_LOVING,
-    EYE_FOCUSED
-};
-
-// WS2812 LED Patterns
-enum LedPattern {
-    LED_OFF,
-    LED_BREATHING_BLUE,
-    LED_BREATHING_WHITE,
-    LED_SPINNING_BLUE,
-    LED_ROTATING_CYAN,
-    LED_PULSE_GREEN,
-    LED_FLASH_BLUE,
-    LED_MOVING_WHITE,
-    LED_DIRECTION_WHITE,
-    LED_FLASH_RED,
-    LED_CHASE_ORANGE,
-    LED_BREATHING_GREEN,
-    LED_BREATHING_YELLOW,
-    LED_BLINKING_RED,
-    LED_CHASING_BLUE,
-    LED_FLASH_GREEN,
-    LED_BREATHING_PURPLE,
-    LED_RAINBOW_SWEEP,
-    LED_FADE_BLUE,
-    LED_STROBE_RED,
-    LED_SCANNER_WHITE,
-    LED_DIM_BLUE
-};
-
-// Buzzer Sounds
-enum BuzzerSound {
-    SOUND_NONE,
-    SOUND_STARTUP,
-    SOUND_SHORT_BEEP,
-    SOUND_CONFIRMATION,
-    SOUND_WARNING,
-    SOUND_CHARGE_CONNECT,
-    SOUND_LOW_BATTERY,
-    SOUND_ALARM,
-    SOUND_SUCCESS,
-    SOUND_GREETING,
-    SOUND_GOODBYE,
-    SOUND_CONTINUOUS_ALARM
-};
-
-// ======================================================
 // CONFIGURATION STRUCTURE MAPPING
 // ======================================================
 struct StateBehaviorConfig {
     OperatingState state;
     const char* name;
-    OledEyeAnim eyeAnim;
-    LedPattern frontLed;
-    LedPattern rearLed;
-    BuzzerSound buzzer;
+    const char* oledText;
 };
 
 // Array of operating states mappings
 const StateBehaviorConfig STATE_BEHAVIOR_CONFIGS[OP_STATE_COUNT] = {
-    // State | Name | OLED Eyes | Front LEDs | Rear LEDs | Buzzer
-    { OP_BOOTING, "Booting", EYE_LOADING, LED_BREATHING_BLUE, LED_BREATHING_BLUE, SOUND_STARTUP },
-    { OP_IDLE, "Idle", EYE_BLINK, LED_BREATHING_WHITE, LED_OFF, SOUND_NONE },
-    { OP_LISTENING, "Listening", EYE_WIDE, LED_SPINNING_BLUE, LED_OFF, SOUND_SHORT_BEEP },
-    { OP_THINKING, "Thinking", EYE_LOOK_UP, LED_ROTATING_CYAN, LED_ROTATING_CYAN, SOUND_NONE },
-    { OP_SPEAKING, "Speaking", EYE_HAPPY, LED_PULSE_GREEN, LED_PULSE_GREEN, SOUND_NONE }, // using EYE_HAPPY for talking mouth anim context
-    { OP_WAKE_WORD_DETECTED, "Wake Word Detected", EYE_WIDE, LED_FLASH_BLUE, LED_FLASH_BLUE, SOUND_CONFIRMATION },
-    { OP_FOLLOWING_USER, "Following User", EYE_FOCUSED, LED_MOVING_WHITE, LED_MOVING_WHITE, SOUND_NONE },
-    { OP_NAVIGATION, "Navigation", EYE_FOCUSED, LED_DIRECTION_WHITE, LED_DIRECTION_WHITE, SOUND_NONE },
-    { OP_OBSTACLE_DETECTED, "Obstacle Detected", EYE_SHOCKED, LED_FLASH_RED, LED_FLASH_RED, SOUND_WARNING },
-    { OP_AVOIDING_OBSTACLE, "Avoiding Obstacle", EYE_LOOK_LEFT_RIGHT, LED_CHASE_ORANGE, LED_CHASE_ORANGE, SOUND_NONE },
-    { OP_CHARGING, "Charging", EYE_SLEEPY, LED_BREATHING_GREEN, LED_BREATHING_GREEN, SOUND_CHARGE_CONNECT },
-    { OP_BATTERY_LOW, "Battery Low", EYE_TIRED, LED_BREATHING_YELLOW, LED_BREATHING_YELLOW, SOUND_LOW_BATTERY },
-    { OP_ERROR, "Error", EYE_X_EYES, LED_BLINKING_RED, LED_BLINKING_RED, SOUND_ALARM },
-    { OP_WIFI_CONNECTING, "WiFi Connecting", EYE_SEARCHING, LED_CHASING_BLUE, LED_CHASING_BLUE, SOUND_NONE },
-    { OP_CONNECTED, "Connected", EYE_HAPPY, LED_FLASH_GREEN, LED_FLASH_GREEN, SOUND_SUCCESS },
-    { OP_OTA_UPDATE, "OTA Update", EYE_PROGRESS, LED_BREATHING_PURPLE, LED_BREATHING_PURPLE, SOUND_NONE },
-    { OP_SLEEPING, "Sleeping", EYE_CLOSED, LED_OFF, LED_DIM_BLUE, SOUND_NONE },
-    { OP_GREETING_USER, "Greeting User", EYE_HAPPY, LED_RAINBOW_SWEEP, LED_RAINBOW_SWEEP, SOUND_GREETING },
-    { OP_GOODBYE, "Goodbye", EYE_SMILE, LED_FADE_BLUE, LED_FADE_BLUE, SOUND_GOODBYE },
-    { OP_ALARM_MODE, "Alarm Mode", EYE_ANGRY, LED_STROBE_RED, LED_STROBE_RED, SOUND_CONTINUOUS_ALARM },
-    { OP_SECURITY_PATROL, "Security Patrol", EYE_SCANNING, LED_SCANNER_WHITE, LED_SCANNER_WHITE, SOUND_NONE }
+    { OP_BOOTING, "Booting", "Loading..." },
+    { OP_IDLE_READY, "Idle Ready", "Ready" },
+    { OP_MANUAL_CONTROL, "Manual Control", "Manual" },
+    { OP_AUTONOMOUS_PATROL, "Autonomous Patrol", "Patrol" },
+    { OP_LINE_FOLLOWING, "Line Following", "Line mode" },
+    { OP_FOLLOW_ME, "Follow Me", "Following" },
+    { OP_AI_THINKING, "AI Thinking", "Thinking..." },
+    { OP_LISTENING, "Listening", "Listening" },
+    { OP_SPEAKING, "Speaking", "Talking" },
+    { OP_CAMERA_RECORDING, "Camera Recording", "REC" },
+    { OP_CHARGING, "Charging", "Charging %" },
+    { OP_FULLY_CHARGED, "Fully Charged", "Full" },
+    { OP_LOW_BATTERY, "Low Battery", "Low battery" },
+    { OP_CRITICAL_BATTERY, "Critical Battery", "Critical battery" },
+    { OP_OBSTACLE_WARNING, "Obstacle Warning", "Obstacle near" },
+    { OP_OBSTACLE_CRITICAL, "Obstacle Critical", "Stop: obstacle" },
+    { OP_WIFI_CONNECTING, "WiFi Connecting", "WiFi..." },
+    { OP_MQTT_DISCONNECTED, "MQTT Disconnected", "Cloud disconnected" },
+    { OP_SENSOR_ERROR, "Sensor Error", "Sensor error" },
+    { OP_MOTOR_ERROR, "Motor Error", "Motor fault" },
+    { OP_UNKNOWN_PERSON, "Unknown Person", "Unknown person" },
+    { OP_INTRUDER_DETECTED, "Intruder Detected", "Intruder" },
+    { OP_GAS_ALERT, "Gas Alert", "Gas detected" },
+    { OP_EMERGENCY_STOP, "Emergency Stop", "STOP" },
+    { OP_SHUTDOWN, "Shutdown", "Goodbye" }
 };
 
 #endif // ROBOT_STATES_H
