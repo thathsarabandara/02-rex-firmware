@@ -13,9 +13,11 @@
 // ======================================================
 // I2C BUS CONFIGURATION
 // ======================================================
-#define I2C_SDA                 21
-#define I2C_SCL                 22
-#define I2C_CLOCK_SPEED         100000
+#define I2C_DISPLAY_SDA         21
+#define I2C_DISPLAY_SCL         22
+#define I2C_SENSOR_SDA          32
+#define I2C_SENSOR_SCL          33
+#define I2C_CLOCK_SPEED         100000 // 100kHz for stability
 
 // ======================================================
 // I2C DEVICE ADDRESSES
@@ -36,15 +38,18 @@
 #define OLED_DISPLAY_DRIVER     DISPLAY_DRIVER_SH1106 // Default to SH1106. Change to DISPLAY_DRIVER_SSD1306 if display is jagy/shifted.
 
 // ======================================================
-// TB6612FNG MOTOR DRIVER PINS
+// TB6612FNG MOTOR DRIVER PINS (MCP23017 & ESP32)
 // ======================================================
-#define MOTOR_LEFT_PWMA         25
-#define MOTOR_LEFT_AIN1         26
-#define MOTOR_LEFT_AIN2         27
-#define MOTOR_RIGHT_PWMB        33
-#define MOTOR_RIGHT_BIN1        14
-#define MOTOR_RIGHT_BIN2        12
-#define MOTOR_STBY              13
+// High-Speed PWMs remain on ESP32
+#define MOTOR_LEFT_PWMA         14
+#define MOTOR_RIGHT_PWMB        13
+
+// Low-Speed Logic moved to MCP23017 Port B (Pins 8-15)
+#define MOTOR_LEFT_AIN1         8   // GPB0
+#define MOTOR_LEFT_AIN2         9   // GPB1
+#define MOTOR_RIGHT_BIN1        10  // GPB2
+#define MOTOR_RIGHT_BIN2        11  // GPB3
+#define MOTOR_STBY              12  // GPB4
 
 // ======================================================
 // SERVO CHANNELS & LIMITS (PCA9685)
@@ -53,12 +58,12 @@
 #define SERVOMIN                125   // Out of 4096 (12-bit)
 #define SERVOMAX                575   // Out of 4096 (12-bit)
 
-#define PAN_SERVO_CH            1
+#define PAN_SERVO_CH            0
 #define PAN_MIN                 0
 #define PAN_MAX                 180
 #define PAN_HOME                90
 
-#define TILT_SERVO_CH           2
+#define TILT_SERVO_CH           1
 #define TILT_MIN                70
 #define TILT_MAX                140
 #define TILT_HOME               90
@@ -78,10 +83,30 @@
 #define DHT_TYPE                DHT22
 
 // ======================================================
+// FRONT ULTRASONIC SENSOR (HC-SR04)
+// ======================================================
+#define ULTRASONIC_TRIG_PIN     18
+#define ULTRASONIC_ECHO_PIN     19
+
+// ======================================================
+// INMP441 I2S MICROPHONE
+// ======================================================
+#define INMP441_SCK             25
+#define INMP441_WS              26
+#define INMP441_SD              27
+
+// ======================================================
+// MAX98357 I2S AMPLIFIER (SPEAKER)
+// ======================================================
+#define MAX98357_BCLK           16
+#define MAX98357_LRC            15
+#define MAX98357_DIN            2
+
+// ======================================================
 // WS2812 NEOPIXEL LED STRIPS
 // ======================================================
-#define NEOPIXEL_FRONT_PIN      5
-#define NEOPIXEL_BACK_PIN       18
+#define NEOPIXEL_FRONT_PIN      17
+#define NEOPIXEL_BACK_PIN       05
 #define LED_COUNT               10
 
 // ======================================================
@@ -95,14 +120,6 @@
 const float DEFAULT_SMOOTH_FACTOR = 0.12f;
 const float DEFAULT_MAX_SPEED     = 1.0f;
 const int   UPDATE_DELAY_MS       = 20;
-
-// Joystick pins (remapped to input-only pins to avoid pin 33 conflict)
-#define JOY1_X                  36
-#define JOY1_Y                  39
-#define JOY2_X                  34
-#define JOY2_Y                  35
-const int   JOYSTICK_DEADZONE     = 180;
-const int   JOYSTICK_CENTER       = 2048;
 
 // ======================================================
 // DATA STRUCTURES
