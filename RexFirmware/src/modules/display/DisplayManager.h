@@ -7,6 +7,7 @@
 #include "../sensors/SensorManager.h"
 #include "../../../include/Config.h"
 #include "../../../include/RobotStates.h"
+#include "DisplayEyes.h"
 
 class DisplayManager {
 public:
@@ -25,16 +26,11 @@ private:
     #error "Invalid OLED_DISPLAY_DRIVER specified in Config.h"
 #endif
     bool _initialized;
+    DisplayEyes _eyes;
     
     void drawHeader(const String& ipAddr, bool mqttConnected);
     void drawTelemetry(const RobotTelemetry& telemetry);
     void drawIRBar(const RobotTelemetry& telemetry);
-    void drawProceduralEyes(OledEyeAnim anim, int frame);
-    
-    // Procedural eye helpers
-    void drawLeftEye(int x, int y, int w, int h, int radius, bool filled = true);
-    void drawRightEye(int x, int y, int w, int h, int radius, bool filled = true);
-    void drawHeart(int x, int y, int size);
 };
 
 #endif // DISPLAY_MANAGER_H
