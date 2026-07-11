@@ -16,6 +16,9 @@ struct RobotTelemetry {
     bool irRightInner;
     bool irRightOuter;
 
+    // Ultrasonic Sensor
+    float distanceCM;
+
     // Environment
     float temperature;
     float humidity;
@@ -38,6 +41,7 @@ public:
     bool begin();
     void update();
     const RobotTelemetry& getTelemetry() const;
+    Adafruit_MCP23X17& getMCP(); // Expose MCP for motor control
 
 private:
     Adafruit_MCP23X17 _mcp;
@@ -52,10 +56,13 @@ private:
     bool _mpuInitialized;
     bool _inaInitialized;
 
+    unsigned long _lastUltrasonicRead;
+
     void readIRSensors();
     void readEnvironment();
     void readIMU();
     void readPower();
+    void readUltrasonic();
 };
 
 #endif // SENSOR_MANAGER_H
