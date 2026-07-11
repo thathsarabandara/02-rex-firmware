@@ -1,6 +1,6 @@
 #include "ServoController.h"
 
-ServoController::ServoController(uint8_t addr) : _pwm(addr) {}
+ServoController::ServoController(uint8_t addr) : _pwm(addr, Wire1) {}
 
 void ServoController::begin() {
     _pwm.begin();
