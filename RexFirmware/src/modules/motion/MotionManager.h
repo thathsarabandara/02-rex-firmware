@@ -4,12 +4,13 @@
 #include "../../../include/Config.h"
 #include "../servo_control/ServoController.h"
 #include "../motor_control/MotorController.h"
+#include <Adafruit_MCP23X17.h>
 
 class MotionManager {
 public:
     MotionManager(ServoController& controller, MotorController& motorController);
 
-    void begin();
+    void begin(Adafruit_MCP23X17* mcp);
     void update();
     void setTarget(int servoIndex, float newTarget);
     void moveJoint(int servoIndex, float intensity);

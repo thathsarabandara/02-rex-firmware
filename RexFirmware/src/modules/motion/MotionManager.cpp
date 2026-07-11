@@ -9,9 +9,9 @@ MotionManager::MotionManager(ServoController& controller, MotorController& motor
     _servos[1] = {TILT_SERVO_CH, TILT_HOME, TILT_HOME, TILT_MIN, TILT_MAX};
 }
 
-void MotionManager::begin() {
+void MotionManager::begin(Adafruit_MCP23X17* mcp) {
     _controller.begin();
-    _motorController.begin();
+    _motorController.begin(mcp);
     startupSequence();
 }
 
@@ -80,31 +80,36 @@ void MotionManager::startupSequence() {
     for (int i = 0; i < 2; i++) {
         _controller.setAngle(_servos[i].channel, _servos[i].currentAngle);
     }
+    delay(300); // Give it a moment to reach home
     
     Serial.println("Performing Pan/Tilt self-test...");
     
-    // Pan sweep
-    _controller.setAngle(PAN_SERVO_CH, PAN_HOME - 20);
-    delay(200);
-    _controller.setAngle(PAN_SERVO_CH, PAN_HOME + 20);
-    delay(200);
+    // Noticeable Pan sweep (Left to Right)
+    _controller.setAngle(PAN_SERVO_CH, PAN_HOME - 45);
+    delay(400);
+    _controller.setAngle(PAN_SERVO_CH, PAN_HOME + 45);
+    delay(400);
     _controller.setAngle(PAN_SERVO_CH, PAN_HOME);
-    delay(200);
+    delay(400);
 
-    // Tilt sweep
-    _controller.setAngle(TILT_SERVO_CH, TILT_HOME - 15);
-    delay(200);
-    _controller.setAngle(TILT_SERVO_CH, TILT_HOME + 15);
-    delay(200);
+    // Noticeable Tilt sweep (Down to Up)
+    _controller.setAngle(TILT_SERVO_CH, TILT_HOME - 30);
+    delay(400);
+    _controller.setAngle(TILT_SERVO_CH, TILT_HOME + 30);
+    delay(400);
     _controller.setAngle(TILT_SERVO_CH, TILT_HOME);
-    delay(200);
+    delay(400);
 
-    // Motor self-test sequence
+    // Noticeable Motor self-test sequence
     Serial.println("Performing Motor self-test...");
-    _motorController.drive(0.0f, 0.4f); // Move forward 40% speed
-    delay(150);
-    _motorController.drive(0.0f, -0.4f); // Move backward 40% speed
-    delay(150);
+    _motorController.drive(0.0f, 0.6f);  // Move forward 60% speed
+    delay(300);
+    _motorController.drive(0.0f, -0.6f); // Move backward 60% speed
+    delay(300);
+    _motorController.drive(-0.6f, 0.0f); // Spin left 60% speed
+    delay(250);
+    _motorController.drive(0.6f, 0.0f);  // Spin right 60% speed
+    delay(250);
     _motorController.stop();             // Stop motors
 
     Serial.println("Motion System Initialized");
