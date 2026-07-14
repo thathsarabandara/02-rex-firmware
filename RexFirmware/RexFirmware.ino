@@ -10,6 +10,7 @@
 #include "src/modules/sensors/SensorManager.h"
 #include "src/modules/display/DisplayManager.h"
 #include "src/modules/indicators/IndicatorHandler.h"
+#include "src/modules/audio/AudioManager.h"
 
 // Set to true to run the state demo loop, cycling all 21 states
 #define STATE_DEMO_LOOP_MODE    true
@@ -25,6 +26,7 @@ SensorManager    sensors;
 DisplayManager   displayMgr;
 IndicatorHandler indicators;
 RobotNetwork     network(motion, sensors);
+AudioManager     audio;
 
 // Operating State & Frame Timing
 OperatingState currentState = OP_BOOTING;
@@ -42,6 +44,9 @@ void setup() {
 
     // 1. Initialize Buzzer & LEDs
     indicators.begin();
+    
+    // 1b. Initialize AudioManager (Speaker and Mic)
+    audio.begin();
     
     // 2. Initialize Primary I2C (Display) & Secondary I2C (Sensors/Servos)
     Wire.begin(I2C_DISPLAY_SDA, I2C_DISPLAY_SCL);
