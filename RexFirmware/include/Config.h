@@ -106,13 +106,13 @@
 // WS2812 NEOPIXEL LED STRIPS
 // ======================================================
 #define NEOPIXEL_FRONT_PIN      17
-#define NEOPIXEL_BACK_PIN       05
+#define NEOPIXEL_BACK_PIN       12
 #define LED_COUNT               10
 
 // ======================================================
 // BUZZER PIN
 // ======================================================
-#define BUZZER_PIN              15
+#define BUZZER_PIN              4
 
 // ======================================================
 // MOVEMENT SETTINGS
